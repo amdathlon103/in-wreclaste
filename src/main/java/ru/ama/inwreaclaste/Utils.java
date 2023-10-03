@@ -1,11 +1,11 @@
 package ru.ama.inwreaclaste;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 public class Utils {
 
-    public static void setSessionUser(HttpServletRequest request, User user ){
+    public static void setSessionUser( HttpServletRequest request, User user ){
         HttpSession session = request.getSession();
         session.setAttribute(Constants.SESSION_USER, user);
     }

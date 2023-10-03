@@ -7,9 +7,9 @@ import ru.ama.inwreaclaste.Utils;
 import ru.ama.inwreaclaste.rest.dto.CustomResponse;
 import ru.ama.inwreaclaste.rest.dto.UserDto;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping( value = "/signup" )

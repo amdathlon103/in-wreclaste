@@ -1,7 +1,6 @@
-package ru.ama.inwreaclaste.ignite.entities;
+package ru.ama.inwreaclaste.database.entities;
 
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * @author AmaJohny, amdathlon103@gmail.com

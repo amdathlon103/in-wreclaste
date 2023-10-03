@@ -1,18 +1,19 @@
 package ru.ama.inwreaclaste.web;
 
+import jakarta.servlet.*;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
 
 @Component
 @Order( 1 )
 public class CORSFilter implements Filter {
 
     public void doFilter( ServletRequest req, ServletResponse res, FilterChain chain )
-            throws IOException, ServletException {
+            throws IOException, ServletException
+    {
         HttpServletResponse response = (HttpServletResponse) res;
         response.setHeader( "Access-Control-Allow-Origin", "http://localhost:3000" );
         response.setHeader( "Access-Control-Allow-Credentials", "true" );

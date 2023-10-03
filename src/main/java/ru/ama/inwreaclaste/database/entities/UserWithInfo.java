@@ -1,8 +1,6 @@
-package ru.ama.inwreaclaste.ignite.entities;
+package ru.ama.inwreaclaste.database.entities;
 
 import ru.ama.inwreaclaste.User;
-
-import org.apache.ignite.cache.query.annotations.QuerySqlField;
 
 import java.util.Objects;
 
@@ -12,14 +10,12 @@ import java.util.Objects;
  */
 public class UserWithInfo {
 
-    @QuerySqlField( index = true, notNull = true )
     public String id;
 
-    @QuerySqlField( index = true, notNull = true )
     public String login;
 
     public String password;
-    @QuerySqlField( index = true )
+
     public String email;
 
     public User.Role role;
@@ -101,6 +97,10 @@ public class UserWithInfo {
         this.block1 = !( dob.isEmpty() && htown.isEmpty() );
         this.block2 = !( instagram.isEmpty() && vk.isEmpty() && url1.isEmpty() && url2.isEmpty() );
         this.block3 = !( music.isEmpty() && about.isEmpty() );
+    }
+
+    public UserWithInfo() {
+
     }
 
     @Override
