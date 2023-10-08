@@ -1,9 +1,8 @@
 package ru.ama.inwreaclaste.database;
 
-import ru.ama.inwreaclaste.ChatMessage;
-import ru.ama.inwreaclaste.DbAccessor;
 import ru.ama.inwreaclaste.User;
 import ru.ama.inwreaclaste.UserInfo;
+import ru.ama.inwreaclaste.chat.ChatMessage;
 import ru.ama.inwreaclaste.database.entities.BaseUser;
 import ru.ama.inwreaclaste.database.utils.ObjectCreator;
 
@@ -14,10 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class BaseUserService implements DbAccessor {
+public class RegistryAccessorService implements RegistryAccessor {
 
     @Autowired
     private BaseUserRepository baseUserRepository;
+    @Autowired
+    private UserInfoRepository userInfoRepository;
 
     @Override
     public void addUser( User user ) {
@@ -53,22 +54,20 @@ public class BaseUserService implements DbAccessor {
 
     @Override
     public void updateUser( User user ) {
-
+        var baseUser = ObjectCreator.createFrom( user );
+        baseUserRepository.save( baseUser );
     }
 
     @Override
     public UserInfo getUserInfo( String id ) {
-        return null;
+        var userInfo = userInfoRepository.getReferenceById( id );
+        return ObjectCreator.createFrom( userInfo );
     }
 
     @Override
-    public UserInfo getUserInfoByLogin( String login ) {
-        return new UserInfo( "foo" );
-    }
-
-    @Override
-    public void updateUserInfo( String userId, UserInfo userInfo ) {
-
+    public UserInfo updateUserInfo( UserInfo userInfo ) {
+        var userInfoEntity = ObjectCreator.createFrom( userInfo );
+        return ObjectCreator.createFrom( userInfoRepository.save( userInfoEntity ) );
     }
 
     @Override

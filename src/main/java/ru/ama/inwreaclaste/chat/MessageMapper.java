@@ -1,6 +1,6 @@
-package ru.ama.inwreaclaste;
+package ru.ama.inwreaclaste.chat;
 
-import ru.ama.inwreaclaste.websocket.dto.OutputMessage;
+import ru.ama.inwreaclaste.chat.websocket.dto.OutputMessage;
 
 import java.util.ArrayList;
 import java.util.List;

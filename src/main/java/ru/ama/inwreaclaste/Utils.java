@@ -1,17 +1,18 @@
 package ru.ama.inwreaclaste;
 
+import ru.ama.inwreaclaste.security.AuthUser;
+
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
 
 public class Utils {
 
-    public static void setSessionUser( HttpServletRequest request, User user ){
-        HttpSession session = request.getSession();
-        session.setAttribute(Constants.SESSION_USER, user);
-    }
-
-    public static User getSessionUser(HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-        return (User) session.getAttribute(Constants.SESSION_USER);
+    @Nullable
+    public static AuthUser getAuthenticatedUser( HttpServletRequest request ) {
+        var auth = (Authentication) request.getUserPrincipal();
+        if ( auth == null )
+            return null;
+        return (AuthUser) auth.getPrincipal();
     }
 }

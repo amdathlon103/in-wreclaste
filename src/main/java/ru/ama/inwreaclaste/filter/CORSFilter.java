@@ -1,4 +1,4 @@
-package ru.ama.inwreaclaste.web;
+package ru.ama.inwreaclaste.filter;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletResponse;

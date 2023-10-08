@@ -1,4 +1,6 @@
-package ru.ama.inwreaclaste;
+package ru.ama.inwreaclaste.chat;
+
+import ru.ama.inwreaclaste.User;
 
 import java.util.Date;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package ru.ama.inwreaclaste.websocket.dto;
+package ru.ama.inwreaclaste.chat.websocket.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

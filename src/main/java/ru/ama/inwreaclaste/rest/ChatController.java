@@ -1,21 +1,19 @@
 package ru.ama.inwreaclaste.rest;
 
-import ru.ama.inwreaclaste.ChatMessage;
-import ru.ama.inwreaclaste.DbAccessor;
-import ru.ama.inwreaclaste.MessageMapper;
 import ru.ama.inwreaclaste.User;
+import ru.ama.inwreaclaste.chat.ChatMessage;
+import ru.ama.inwreaclaste.chat.MessageMapper;
+import ru.ama.inwreaclaste.chat.websocket.dto.InputMessage;
+import ru.ama.inwreaclaste.chat.websocket.dto.OutputMessage;
+import ru.ama.inwreaclaste.database.RegistryAccessor;
 import ru.ama.inwreaclaste.rest.dto.ChatChannelDto;
-import ru.ama.inwreaclaste.websocket.dto.InputMessage;
-import ru.ama.inwreaclaste.websocket.dto.OutputMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -25,11 +23,11 @@ import java.util.List;
 @RequestMapping( value = "/private-chat" )
 public class ChatController {
 
-    private final DbAccessor dbAccessor;
+    private final RegistryAccessor registryAccessor;
 
     @Autowired
-    public ChatController( DbAccessor dbAccessor ) {
-        this.dbAccessor = dbAccessor;
+    public ChatController( RegistryAccessor registryAccessor ) {
+        this.registryAccessor = registryAccessor;
     }
 
     //
@@ -67,12 +65,12 @@ public class ChatController {
     @MessageMapping( "/private.chat.{channelId}" )
     @SendTo( "/topic/private.chat.{channelId}" )
     public OutputMessage chatMessage( @DestinationVariable String channelId, InputMessage inputMessage ) {
-        User sender = dbAccessor.getUserByLogin( inputMessage.sender );
-        User recipient = dbAccessor.getUserByLogin( inputMessage.recipient );
+        User sender = registryAccessor.getUserByLogin( inputMessage.sender );
+        User recipient = registryAccessor.getUserByLogin( inputMessage.recipient );
 
         ChatMessage chatMessage = new ChatMessage( sender, recipient, inputMessage.contents, new Date() );
 
-        dbAccessor.saveMessage( channelId, chatMessage );
+        registryAccessor.saveMessage( channelId, chatMessage );
 
         return OutputMessage.of( chatMessage );
     }
@@ -86,17 +84,17 @@ public class ChatController {
     }
 
     public String establishChatSession( ChatChannelDto chatChannel ) {
-        User userOne = dbAccessor.getUserByLogin( chatChannel.userOneFullName );
-        User userTwo = dbAccessor.getUserByLogin( chatChannel.userTwoFullName );
-        String uuid = dbAccessor.getChannelId( userOne.id, userTwo.id );
+        User userOne = registryAccessor.getUserByLogin( chatChannel.userOneFullName );
+        User userTwo = registryAccessor.getUserByLogin( chatChannel.userTwoFullName );
+        String uuid = registryAccessor.getChannelId( userOne.id, userTwo.id );
 
         // If channel doesn't already exist, create a new one
-        return ( uuid != null ) ? uuid : dbAccessor.saveChatChannel( userOne, userTwo );
+        return ( uuid != null ) ? uuid : registryAccessor.saveChatChannel( userOne, userTwo );
     }
 
     @GetMapping( "/channel/{channelUuid}" )
     public ResponseEntity<List<OutputMessage>> getExistingChatMessages( @PathVariable( "channelUuid" ) String channelUuid ) {
-        List<ChatMessage> chatMessages = dbAccessor.getChannelHistory( channelUuid, 0, 100 );
+        List<ChatMessage> chatMessages = registryAccessor.getChannelHistory( channelUuid, 0, 100 );
 
         List<OutputMessage> outputMessages = MessageMapper.mapChatMessagesToOutputMessages( chatMessages );
 

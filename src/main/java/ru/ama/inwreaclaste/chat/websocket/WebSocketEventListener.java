@@ -1,4 +1,4 @@
-package ru.ama.inwreaclaste.websocket;
+package ru.ama.inwreaclaste.chat.websocket;
 
 import org.springframework.stereotype.Component;
 
