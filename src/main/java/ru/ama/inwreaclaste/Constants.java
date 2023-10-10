@@ -6,7 +6,6 @@ package ru.ama.inwreaclaste;
  */
 public class Constants {
 
-    public static final String SESSION_USER = "sessionUser";
     public static final String SECURED_CHAT_HISTORY = "/secured/history";
     public static final String SECURED_CHAT = "/secured/chat";
     public static final String SECURED_CHAT_ROOM = "/secured/room";

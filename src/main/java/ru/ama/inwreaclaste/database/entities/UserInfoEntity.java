@@ -1,14 +1,15 @@
-package ru.ama.inwreaclaste;
+package ru.ama.inwreaclaste.database.entities;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 
-/**
- * @author AmaJohny, amdathlon103@gmail.com
- * created 06.06.2021
- */
-public class UserInfo {
+@Entity
+public class UserInfoEntity {
 
+    @Id
     public String userId;
 
     public String name;
@@ -25,8 +26,12 @@ public class UserInfo {
     public String about;
     public ZonedDateTime lastUpdated;
 
-    public UserInfo( String userId, String name, String status, String dateOfBirth, String homeTown, String instagramLink,
-                     String vkLink, List<String> customUrls, String music, String about, ZonedDateTime lastUpdated ) {
+    public UserInfoEntity() {
+    }
+
+    public UserInfoEntity( String userId, String name, String status, String dateOfBirth, String homeTown,
+                           String instagramLink, String vkLink, List<String> customUrls,
+                           String music, String about, ZonedDateTime lastUpdated ) {
         this.userId = userId;
         this.name = name;
         this.status = status;
@@ -42,6 +47,10 @@ public class UserInfo {
 
     public String getUserId() {
         return userId;
+    }
+
+    public void setUserId( String userId ) {
+        this.userId = userId;
     }
 
     public String getName() {

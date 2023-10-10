@@ -1,64 +1,95 @@
 package ru.ama.inwreaclaste.rest;
 
-import ru.ama.inwreaclaste.DbAccessor;
+import ru.ama.inwreaclaste.Role;
 import ru.ama.inwreaclaste.User;
 import ru.ama.inwreaclaste.Utils;
-import ru.ama.inwreaclaste.rest.dto.CustomResponse;
-import ru.ama.inwreaclaste.rest.dto.FriendDto;
-import ru.ama.inwreaclaste.rest.dto.UserRs;
+import ru.ama.inwreaclaste.database.RegistryAccessor;
+import ru.ama.inwreaclaste.error.AppException;
+import ru.ama.inwreaclaste.error.AppExceptionCode;
+import ru.ama.inwreaclaste.rest.dto.Dto;
 
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping( value = "/user" )
 public class UserController {
 
-    private final DbAccessor dbAccessor;
+    public static final Logger LOGGER = LoggerFactory.getLogger( UserController.class );
 
     @Autowired
-    public UserController( DbAccessor dbAccessor ) {
-        this.dbAccessor = dbAccessor;
+    private RegistryAccessor registryAccessor;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @PostMapping( "/login" )
+    public Dto.CurrentUser login( @RequestBody Dto.Login loginRq, HttpServletRequest request ) {
+        try {
+            if ( request.getUserPrincipal() == null )
+                request.login( loginRq.login(), loginRq.password() );
+        } catch ( ServletException e ) {
+            throw new AppException( AppExceptionCode.USER_LOGIN_ERROR );
+        }
+
+        var user = Validate.notNull( Utils.getAuthenticatedUser( request ) );
+        LOGGER.info( "User {} logged in.", user.getUsername() );
+
+        return new Dto.CurrentUser( user.getId(), user.getUsername() );
     }
 
-    @GetMapping( "/userinfo/{login}" )
-    public ResponseEntity<CustomResponse<UserRs>> getUser( @PathVariable String login, HttpServletRequest request ) {
-        User user = dbAccessor.getUserByLogin( login );
-        if ( user == null )
-            return new ResponseEntity<>( new CustomResponse<>( null, new String[]{"User not found"}, 2 ), HttpStatus.OK );
-        HttpHeaders headers = new HttpHeaders();
-        User sessionUser = Utils.getSessionUser( request );
-        if ( sessionUser != null && sessionUser.login.equals( login ) ) {
-            headers.add( "logged", "true" );
-            return new ResponseEntity<>( new CustomResponse<>( new UserRs( sessionUser.id, user.login,
-                                                                           user.password, user.email ),
-                                                               null, 1 ),
-                                         headers, HttpStatus.OK );
+    @PostMapping( "/register" )
+    public Dto.RegisteredUser register( @RequestBody Dto.Register registerRq,
+                                        HttpServletRequest request ) throws ServletException
+    {
+        boolean newUser = false;
+        if ( Utils.getAuthenticatedUser( request ) == null ) {
+            validateLoginAndEmail( registerRq );
+
+            User user = new User( registerRq.login(), passwordEncoder.encode( registerRq.password() ),
+                                  registerRq.email(), Role.USER );
+            registryAccessor.addUser( user );
+            request.login( registerRq.login(), registerRq.password() );
+            newUser = true;
         }
-        headers.add( "logged", "false" );
-        return new ResponseEntity<>( new CustomResponse<>( new UserRs( "", user.login, "", "" ), null, 1 ), headers, HttpStatus.OK );
+        var user = Validate.notNull( Utils.getAuthenticatedUser( request ) );
+
+        return new Dto.RegisteredUser( user.getId(), user.getUsername(), newUser );
     }
 
-    @GetMapping( "/getFriendList" )
-    public ResponseEntity<CustomResponse<List<FriendDto>>> getFriends() {
-        List<User> users = dbAccessor.getUsers();
-        List<FriendDto> friends = new ArrayList<>();
-        for ( User user : users ) {
-            friends.add( new FriendDto( user.id, user.login ) );
-        }
-//        users.add(new User(1, "debt", "12345", "debt@debt.com", UserRoleEnum.ADMIN));
-//        users.add(new User(2, "debt1", "12345", "debt@debt.com",UserRoleEnum.ADMIN));
-//        users.add(new User(3, "debt2", "12345", "debt@debt.com",UserRoleEnum.USER));
-//        users.add(new User(4, "debt3", "12345", "debt@debt.com",UserRoleEnum.ADMIN));
-//        context.close();
-        return new ResponseEntity<>( new CustomResponse<>( friends, null, 1 ), HttpStatus.OK );
+    private void validateLoginAndEmail( Dto.Register registerRq ) {
+        if ( this.loginTaken( registerRq.login() ) )
+            throw new AppException( AppExceptionCode.ALREADY_TAKEN_REGISTRATION_ERROR, "login" );
+
+        if ( this.emailTaken( registerRq.email() ) )
+            throw new AppException( AppExceptionCode.ALREADY_TAKEN_REGISTRATION_ERROR, "email" );
+    }
+
+    private boolean loginTaken( String value ) {
+        var user = registryAccessor.getUserByLogin( value );
+        return user != null;
+    }
+
+    private boolean emailTaken( String value ) {
+        var user = registryAccessor.getUserByEmail( value );
+        return user != null;
+    }
+
+    @PostMapping( "/populateCurrentUser" )
+    public Dto.UserInfo populateCurrentUser( @RequestBody Dto.UserInfo userInfoRq, HttpServletRequest request ) {
+        var user = Validate.notNull( Utils.getAuthenticatedUser( request ) );
+        var userInfo = Dto.createFrom( userInfoRq, user.getId() );
+        return Dto.createFrom( registryAccessor.updateUserInfo( userInfo ) );
+    }
+
+    @GetMapping( "/current" )
+    public Dto.CurrentUser getUsername( HttpServletRequest request ) {
+        var user = Validate.notNull( Utils.getAuthenticatedUser( request ) );
+        return new Dto.CurrentUser( user.getId(), user.getUsername() );
     }
 }
