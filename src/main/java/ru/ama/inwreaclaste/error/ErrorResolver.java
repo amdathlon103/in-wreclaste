@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.time.ZonedDateTime;
-
 @ControllerAdvice
 public class ErrorResolver {
 
@@ -30,11 +28,7 @@ public class ErrorResolver {
     }
 
     public Error resolve( Exception e ) {
-        HttpStatusCode httpStatusCode = calculateStatusCode( e );
-        String code = calculateCode( e );
-        String title = e.getMessage();
-        ZonedDateTime time = ZonedDateTime.now();
-        return new Error( httpStatusCode, code, title, time );
+        return new Error( calculateStatusCode( e ), calculateCode( e ), e.getMessage(), System.currentTimeMillis() );
     }
 
     private HttpStatusCode calculateStatusCode( Exception e ) {

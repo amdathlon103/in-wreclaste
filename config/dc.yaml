@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app: in-wreaclaste
+spec:
+  selector:
+    matchLabels:
+      app: in-wreaclaste
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: in-wreaclaste
+    spec:
+      containers:
+        - name: app
+          image: in-wreaclaste/app
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8088
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /app/actuator/health/liveness
+              port: 8088
+            initialDelaySeconds: 15
+            periodSeconds: 3

@@ -21,10 +21,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain( HttpSecurity http ) throws Exception {
         return http
                    .authorizeHttpRequests( customizer -> customizer
-                                                             .requestMatchers( "/test/login" ).permitAll()
-                                                             .requestMatchers( "/test/add" ).permitAll()
                                                              .requestMatchers( "/user/login" ).permitAll()
                                                              .requestMatchers( "/user/register" ).permitAll()
+                                                             .requestMatchers( "/actuator/health/**" ).permitAll()
                                                              .requestMatchers( "/user/**" ).hasAnyAuthority( Role.USER.name(), Role.ADMIN.name() )
                                                              .requestMatchers( "/admin/**" ).hasAuthority( Role.ADMIN.name() )
                                                              .requestMatchers( "/**" ).denyAll()
